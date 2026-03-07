@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AtlasChat Admin</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-1: #f4f7fb;
+      --bg-2: #eaf1fa;
+      --ink: #0f172a;
+      --muted: #4b5563;
+      --line: #dce5f2;
+      --card: #ffffff;
+      --brand: #0b2a52;
+      --brand-2: #204b7f;
+      --ok: #0f9d62;
+      --bad: #c62828;
+      --radius: 16px;
+      --shadow: 0 18px 40px rgba(2, 18, 42, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Manrope, "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 500px at -10% -10%, #ffffff 0%, transparent 55%),
+        radial-gradient(1000px 500px at 110% -10%, #e6effa 0%, transparent 48%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 1150px;
+      margin: 26px auto 40px;
+      padding: 0 16px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+    }
+
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .pill {
+      border: 1px solid #cadef6;
+      background: #eef4fd;
+      color: #15345f;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .panel {
+      grid-column: span 12;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #ffffff, #fbfdff);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .panel p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    label {
+      font-size: 12px;
+      letter-spacing: .01em;
+      color: #324159;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #ccd8ea;
+      border-radius: 12px;
+      background: #fff;
+      font-size: 14px;
+      padding: 10px 11px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #6791c4;
+      box-shadow: 0 0 0 3px #d9e8fa;
+    }
+
+    textarea { min-height: 96px; resize: vertical; }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-brand {
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 20px rgba(10, 44, 88, 0.24);
+    }
+
+    .btn-soft {
+      color: #183861;
+      border: 1px solid #c9dcf5;
+      background: #eef5ff;
+    }
+
+    pre {
+      margin: 12px 0 0;
+      border-radius: 12px;
+      border: 1px solid #d8e4f3;
+      background: #f8fbff;
+      padding: 10px;
+      overflow-x: auto;
+      font-size: 12px;
+      color: #1a3154;
+      max-height: 210px;
+    }
+
+    .biz-list {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .kb-list {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .biz-card {
+      border: 1px solid #d8e4f2;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .kb-card {
+      border: 1px solid #d8e4f2;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .biz-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .biz-name {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .mini {
+      color: #41516b;
+      font-size: 12px;
+    }
+
+    .kv {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 6px;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .status {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--bad); }
+
+    @media (min-width: 940px) {
+      .span-4 { grid-column: span 4; }
+      .span-8 { grid-column: span 8; }
+      .span-6 { grid-column: span 6; }
+    }
+
+    @media (max-width: 760px) {
+      .row, .row3 { grid-template-columns: 1fr; }
+      .top { align-items: flex-start; flex-direction: column; }
+      .title h1 { font-size: 26px; }
+      .kv { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="top">
+      <div class="title">
+        <h1>AtlasChat Admin</h1>
+        <p>Manage tenants, branding, and knowledge base data for each client chatbot.</p>
+      </div>
+      <div class="pill">MVP Control Panel</div>
+    </div>
+
+    <div class="grid">
+      <section class="panel span-4">
+        <h3>API Settings</h3>
+        <p>Connect to your local backend and authenticate admin requests.</p>
+        <div class="row">
+          <div>
+            <label for="apiBase">API Base</label>
+            <input id="apiBase" value="http://localhost:4000" />
+          </div>
+          <div>
+            <label for="adminKey">Admin API Key</label>
+            <input id="adminKey" placeholder="x-admin-api-key" type="password" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="saveCredsBtn" class="btn-soft" type="button">Save Settings</button>
+          <button id="loadBusinessesBtn" class="btn-brand" type="button">Refresh Businesses</button>
+        </div>
+        <div id="status" class="status"></div>
+      </section>
+
+      <section class="panel span-8">
+        <h3>Create Business</h3>
+        <p>Generate a new tenant with isolated widget ID, branding, and tone profile.</p>
+        <div class="row3">
+          <div>
+            <label for="bName">Business Name</label>
+            <input id="bName" placeholder="Northstar Physio" />
+          </div>
+          <div>
+            <label for="bSlug">Slug</label>
+            <input id="bSlug" placeholder="northstar-physio" />
+          </div>
+          <div>
+            <label for="bDomain">Allowed Domain</label>
+            <input id="bDomain" placeholder="https://clientsite.com" />
+          </div>
+        </div>
+        <div class="row3">
+          <div>
+            <label for="bTone">Tone</label>
+            <input id="bTone" value="friendly and concise" />
+          </div>
+          <div>
+            <label for="bHandoffEmail">Human Handoff Email</label>
+            <input id="bHandoffEmail" placeholder="support@clientsite.com" />
+          </div>
+          <div>
+            <label for="bPrimary">Primary Color</label>
+            <input id="bPrimary" value="#0b2a52" />
+          </div>
+          <div>
+            <label for="bText">Text Color</label>
+            <input id="bText" value="#ffffff" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="createBusinessBtn" class="btn-brand" type="button">Create Business</button>
+        </div>
+        <pre id="createBusinessOutput"></pre>
+      </section>
+
+      <section class="panel span-8">
+        <h3>Businesses</h3>
+        <p>Copy each client embed snippet and confirm subscription state.</p>
+        <div id="businessList" class="biz-list"></div>
+      </section>
+
+      <section class="panel span-4">
+        <h3>Add Knowledge Base Entry</h3>
+        <p>Attach FAQs, pricing, services, hours, and policy content to a tenant.</p>
+        <div>
+          <label for="kbBusinessId">Business ID</label>
+          <input id="kbBusinessId" placeholder="1" />
+        </div>
+        <div class="row">
+          <div>
+            <label for="kbCategory">Category</label>
+            <select id="kbCategory">
+              <option>faqs</option>
+              <option>hours</option>
+              <option>services</option>
+              <option>policies</option>
+              <option>pricing</option>
+              <option>contact</option>
+              <option>other</option>
+            </select>
+          </div>
+          <div>
+            <label for="kbTitle">Title</label>
+            <input id="kbTitle" placeholder="Saturday hours" />
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <label for="kbContent">Content</label>
+          <textarea id="kbContent" placeholder="Open 10:00 AM to 2:00 PM"></textarea>
+        </div>
+        <div class="actions">
+          <button id="createKbBtn" class="btn-brand" type="button">Add Entry</button>
+          <button id="loadKbBtn" class="btn-soft" type="button">Load Entries</button>
+        </div>
+        <pre id="createKbOutput"></pre>
+      </section>
+
+      <section class="panel span-8">
+        <h3>Knowledge Base Entries</h3>
+        <p>Review and manage entries for the selected Business ID.</p>
+        <div id="kbList" class="kb-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function headers() {
+      return {
+        "Content-Type": "application/json",
+        "x-admin-api-key": byId("adminKey").value.trim()
+      };
+    }
+
+    function apiBase() {
+      return byId("apiBase").value.trim().replace(/\/$/, "");
+    }
+
+    function setStatus(text, isError) {
+      const el = byId("status");
+      el.textContent = text;
+      el.className = `status ${isError ? "err" : "ok"}`;
+    }
+
+    function loadSavedSettings() {
+      byId("apiBase").value = localStorage.getItem("atlaschat_api_base") || "http://localhost:4000";
+      byId("adminKey").value = localStorage.getItem("atlaschat_admin_key") || "";
+    }
+
+    function saveSettings() {
+      localStorage.setItem("atlaschat_api_base", byId("apiBase").value.trim());
+      localStorage.setItem("atlaschat_admin_key", byId("adminKey").value.trim());
+      setStatus("Saved API settings locally.", false);
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("Embed snippet copied.", false);
+      } catch (e) {
+        setStatus("Could not copy snippet. Copy manually.", true);
+      }
+    }
+
+    function businessCard(b) {
+      const embed = `<script src="${apiBase()}/widget.js" data-api-base="${apiBase()}" data-widget-id="${b.widget_id}"><\\/script>`;
+      const encodedEdit = encodeURIComponent(JSON.stringify({
+        id: b.id,
+        allowed_domain: b.allowed_domain,
+        handoff_email: b.handoff_email,
+        tone: b.tone,
+        brand_primary_color: b.brand_primary_color,
+        brand_text_color: b.brand_text_color
+      }));
+      return `
+        <article class="biz-card">
+          <div class="biz-head">
+            <h4 class="biz-name">${b.name}</h4>
+            <span class="mini">#${b.id} • ${b.slug}</span>
+          </div>
+          <div class="kv">
+            <strong>Widget ID</strong><span>${b.widget_id}</span>
+            <strong>Allowed Domain</strong><span>${b.allowed_domain}</span>
+            <strong>Handoff Email</strong><span>${b.handoff_email || "Not set"}</span>
+            <strong>Plan / Status</strong><span>${b.subscription_plan || "starter"} / ${b.subscription_status || "trialing"}</span>
+          </div>
+          <div class="actions">
+            <button class="btn-soft" type="button" data-copy='${embed.replace(/'/g, "&#39;")}'>Copy Embed Snippet</button>
+            <button class="btn-soft" type="button" data-fill="${b.id}">Use ID in KB Form</button>
+            <button class="btn-soft" type="button" data-edit="${encodedEdit}">Edit</button>
+            <button class="btn-soft" type="button" data-delete="${b.id}">Delete</button>
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadBusinesses() {
+      const out = byId("businessList");
+      out.innerHTML = '<div class="mini">Loading businesses...</div>';
+
+      try {
+        const res = await fetch(`${apiBase()}/api/admin/businesses`, { headers: headers() });
+        const data = await res.json();
+
+        if (!res.ok) {
+          out.innerHTML = `<div class="mini">${data.error || "Failed to load businesses."}</div>`;
+          setStatus("Failed to fetch businesses.", true);
+          return;
+        }
+
+        if (!data.businesses.length) {
+          out.innerHTML = '<div class="mini">No businesses yet. Create your first tenant.</div>';
+          return;
+        }
+
+        out.innerHTML = data.businesses.map(businessCard).join("");
+        setStatus("Businesses loaded.", false);
+
+        out.querySelectorAll("button[data-copy]").forEach((btn) => {
+          btn.addEventListener("click", () => copyText(btn.getAttribute("data-copy")));
+        });
+
+        out.querySelectorAll("button[data-fill]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            byId("kbBusinessId").value = btn.getAttribute("data-fill");
+            setStatus("Business ID copied to KB form.", false);
+          });
+        });
+
+        out.querySelectorAll("button[data-edit]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const raw = btn.getAttribute("data-edit");
+            const business = JSON.parse(decodeURIComponent(raw));
+
+            const allowedDomain = prompt("Allowed domain", business.allowed_domain || "");
+            if (allowedDomain === null) return;
+
+            const tone = prompt("Tone", business.tone || "");
+            if (tone === null) return;
+
+            const handoffEmail = prompt("Human handoff email (blank disables)", business.handoff_email || "");
+            if (handoffEmail === null) return;
+
+            const primary = prompt("Primary color (hex)", business.brand_primary_color || "#0b2a52");
+            if (primary === null) return;
+
+            const text = prompt("Text color (hex)", business.brand_text_color || "#ffffff");
+            if (text === null) return;
+
+            try {
+              const res = await fetch(`${apiBase()}/api/admin/businesses/${business.id}`, {
+                method: "PATCH",
+                headers: headers(),
+                body: JSON.stringify({
+                  allowedDomain: allowedDomain.trim(),
+                  tone: tone.trim(),
+                  handoffEmail: handoffEmail.trim(),
+                  brandPrimaryColor: primary.trim(),
+                  brandTextColor: text.trim()
+                })
+              });
+
+              const data = await res.json();
+              if (!res.ok) {
+                setStatus(data.error || "Could not update business.", true);
+                return;
+              }
+
+              setStatus(`Business #${business.id} updated.`, false);
+              loadBusinesses();
+            } catch (err) {
+              setStatus("Network error while updating business.", true);
+            }
+          });
+        });
+
+        out.querySelectorAll("button[data-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-delete");
+            const ok = confirm(`Delete business #${id}? This will also remove KB entries and chat logs.`);
+            if (!ok) return;
+
+            try {
+              const res = await fetch(`${apiBase()}/api/admin/businesses/${id}`, {
+                method: "DELETE",
+                headers: headers()
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                setStatus(data.error || "Could not delete business.", true);
+                return;
+              }
+              setStatus(`Business #${id} deleted.`, false);
+              loadBusinesses();
+            } catch (err) {
+              setStatus("Network error while deleting business.", true);
+            }
+          });
+        });
+      } catch (err) {
+        out.innerHTML = '<div class="mini">Network error while loading businesses.</div>';
+        setStatus("Network error while loading businesses.", true);
+      }
+    }
+
+    function kbCard(entry, businessId) {
+      const editPayload = encodeURIComponent(JSON.stringify(entry));
+      return `
+        <article class="kb-card">
+          <div class="biz-head">
+            <h4 class="biz-name">${entry.title}</h4>
+            <span class="mini">#${entry.id} • ${entry.category}</span>
+          </div>
+          <div class="mini" style="margin-top:8px; white-space: pre-wrap;">${entry.content}</div>
+          <div class="actions">
+            <button class="btn-soft" type="button" data-kb-edit="${editPayload}" data-kb-business="${businessId}">Edit</button>
+            <button class="btn-soft" type="button" data-kb-delete="${entry.id}" data-kb-business="${businessId}">Delete</button>
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadKbEntries() {
+      const businessId = byId("kbBusinessId").value.trim();
+      const out = byId("kbList");
+
+      if (!businessId) {
+        out.innerHTML = '<div class="mini">Enter a Business ID to load entries.</div>';
+        return;
+      }
+
+      out.innerHTML = '<div class="mini">Loading knowledge base entries...</div>';
+
+      try {
+        const res = await fetch(`${apiBase()}/api/admin/businesses/${businessId}/kb`, {
+          headers: headers()
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          out.innerHTML = `<div class="mini">${data.error || "Failed to load KB entries."}</div>`;
+          setStatus("Failed to load KB entries.", true);
+          return;
+        }
+
+        if (!data.entries.length) {
+          out.innerHTML = '<div class="mini">No entries for this business yet.</div>';
+          return;
+        }
+
+        out.innerHTML = data.entries.map((entry) => kbCard(entry, businessId)).join("");
+        setStatus("KB entries loaded.", false);
+
+        out.querySelectorAll("button[data-kb-edit]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const business = btn.getAttribute("data-kb-business");
+            const entry = JSON.parse(decodeURIComponent(btn.getAttribute("data-kb-edit")));
+
+            const category = prompt("Category", entry.category || "other");
+            if (category === null) return;
+            const title = prompt("Title", entry.title || "");
+            if (title === null) return;
+            const content = prompt("Content", entry.content || "");
+            if (content === null) return;
+
+            try {
+              const res = await fetch(`${apiBase()}/api/admin/businesses/${business}/kb/${entry.id}`, {
+                method: "PATCH",
+                headers: headers(),
+                body: JSON.stringify({
+                  category: category.trim(),
+                  title: title.trim(),
+                  content: content.trim()
+                })
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                setStatus(data.error || "Could not update KB entry.", true);
+                return;
+              }
+              setStatus(`KB entry #${entry.id} updated.`, false);
+              loadKbEntries();
+            } catch (err) {
+              setStatus("Network error while updating KB entry.", true);
+            }
+          });
+        });
+
+        out.querySelectorAll("button[data-kb-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const business = btn.getAttribute("data-kb-business");
+            const entryId = btn.getAttribute("data-kb-delete");
+            const ok = confirm(`Delete KB entry #${entryId}?`);
+            if (!ok) return;
+
+            try {
+              const res = await fetch(`${apiBase()}/api/admin/businesses/${business}/kb/${entryId}`, {
+                method: "DELETE",
+                headers: headers()
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                setStatus(data.error || "Could not delete KB entry.", true);
+                return;
+              }
+              setStatus(`KB entry #${entryId} deleted.`, false);
+              loadKbEntries();
+            } catch (err) {
+              setStatus("Network error while deleting KB entry.", true);
+            }
+          });
+        });
+      } catch (err) {
+        out.innerHTML = '<div class="mini">Network error while loading KB entries.</div>';
+        setStatus("Network error while loading KB entries.", true);
+      }
+    }
+
+    byId("createBusinessBtn").addEventListener("click", async () => {
+      const payload = {
+        name: byId("bName").value.trim(),
+        slug: byId("bSlug").value.trim(),
+        allowedDomain: byId("bDomain").value.trim(),
+        tone: byId("bTone").value.trim(),
+        handoffEmail: byId("bHandoffEmail").value.trim(),
+        brandPrimaryColor: byId("bPrimary").value.trim(),
+        brandTextColor: byId("bText").value.trim()
+      };
+
+      try {
+        const res = await fetch(`${apiBase()}/api/admin/businesses`, {
+          method: "POST",
+          headers: headers(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        byId("createBusinessOutput").textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          setStatus(data.error || "Could not create business.", true);
+          return;
+        }
+
+        setStatus("Business created.", false);
+        loadBusinesses();
+      } catch (err) {
+        setStatus("Network error while creating business.", true);
+      }
+    });
+
+    byId("createKbBtn").addEventListener("click", async () => {
+      const businessId = byId("kbBusinessId").value.trim();
+      const payload = {
+        category: byId("kbCategory").value,
+        title: byId("kbTitle").value.trim(),
+        content: byId("kbContent").value.trim()
+      };
+
+      try {
+        const res = await fetch(`${apiBase()}/api/admin/businesses/${businessId}/kb`, {
+          method: "POST",
+          headers: headers(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        byId("createKbOutput").textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          setStatus(data.error || "Could not add KB entry.", true);
+          return;
+        }
+
+        setStatus("KB entry added.", false);
+        loadKbEntries();
+      } catch (err) {
+        setStatus("Network error while adding KB entry.", true);
+      }
+    });
+
+    byId("loadBusinessesBtn").addEventListener("click", loadBusinesses);
+    byId("saveCredsBtn").addEventListener("click", saveSettings);
+    byId("loadKbBtn").addEventListener("click", loadKbEntries);
+
+    loadSavedSettings();
+    loadBusinesses();
+  </script>
+</body>
+</html>

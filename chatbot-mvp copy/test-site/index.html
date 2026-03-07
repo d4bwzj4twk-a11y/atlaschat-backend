@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AtlasChat Embed Sandbox</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@500;700;800&display=swap');
+
+    :root {
+      --ink: #0f172a;
+      --muted: #54607a;
+      --line: #d7e2f0;
+      --card: rgba(255, 255, 255, 0.78);
+      --brand: #11386b;
+      --brand-2: #356aa8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(1200px 600px at -10% -5%, #ffffff 0%, transparent 54%),
+        radial-gradient(1200px 600px at 110% 0%, #d9e8ff 0%, transparent 48%),
+        linear-gradient(145deg, #edf3fb, #dbe8f8);
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 980px;
+      margin: 34px auto;
+      padding: 0 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero {
+      border: 1px solid #d7e1f0;
+      background: linear-gradient(130deg, rgba(255,255,255,.9), rgba(242,248,255,.88));
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 20px 42px rgba(11, 28, 61, .11);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Manrope, "Avenir Next", "Segoe UI", sans-serif;
+      font-size: clamp(25px, 5vw, 40px);
+      letter-spacing: -0.02em;
+      line-height: 1.04;
+    }
+
+    p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; }
+
+    .panel {
+      border: 1px solid #d3deef;
+      border-radius: 18px;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      padding: 16px;
+      box-shadow: 0 16px 34px rgba(9, 30, 62, .09);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      font-family: Manrope, "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 12px;
+      color: #30445f;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #c8d7ea;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      padding: 10px 11px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus {
+      border-color: #6d97c8;
+      box-shadow: 0 0 0 3px #ddebfb;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 800;
+      font-family: Manrope, "Avenir Next", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 20px rgba(11, 45, 88, 0.28);
+      transition: transform .15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+
+    #status {
+      margin-top: 10px;
+      min-height: 20px;
+      font-family: Manrope, "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .ok { color: #0d8a53; }
+    .err { color: #c22727; }
+
+    .code {
+      margin-top: 10px;
+      border-radius: 12px;
+      border: 1px solid #cfdeef;
+      background: #f7fbff;
+      padding: 10px;
+      font-size: 12px;
+      overflow-x: auto;
+      color: #24416a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+      .shell { margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <h1>Embed Sandbox</h1>
+      <p>Use this page to test exactly how your customer website will load <strong>widget.js</strong>. Set tenant allowed domain to <code>http://localhost:4000</code> for local testing.</p>
+    </section>
+
+    <section class="panel">
+      <div class="grid">
+        <div>
+          <label for="apiBase">API Base</label>
+          <input id="apiBase" value="http://localhost:4000" />
+        </div>
+        <div>
+          <label for="widgetId">Widget ID</label>
+          <input id="widgetId" placeholder="wid_xxxxxxxxxxxxxxxx" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="loadBtn" type="button">Inject Chat Widget</button>
+      </div>
+      <div id="status"></div>
+      <div class="code" id="embedPreview"></div>
+    </section>
+  </div>
+
+  <script>
+    function byId(id) { return document.getElementById(id); }
+
+    function setStatus(text, cls) {
+      const el = byId("status");
+      el.textContent = text;
+      el.className = cls || "";
+    }
+
+    function getParams() {
+      const p = new URLSearchParams(window.location.search);
+      return {
+        apiBase: p.get("api_base") || "",
+        widgetId: p.get("widget_id") || ""
+      };
+    }
+
+    function normalizeApiBase(input) {
+      let value = (input || "").trim().replace(/\/$/, "");
+      value = value.replace(/\/test-site$/, "");
+      value = value.replace(/\/admin$/, "");
+      return value;
+    }
+
+    function renderEmbedPreview(apiBase, widgetId) {
+      const snippet = `<script src="${apiBase}/widget.js" data-api-base="${apiBase}" data-widget-id="${widgetId}"><\\/script>`;
+      byId("embedPreview").textContent = snippet;
+    }
+
+    function injectWidget(apiBase, widgetId) {
+      const existing = document.getElementById("embedded-chat-widget");
+      if (existing) existing.remove();
+
+      const s = document.createElement("script");
+      s.id = "embedded-chat-widget";
+      s.src = `${apiBase.replace(/\/$/, "")}/widget.js`;
+      s.setAttribute("data-api-base", apiBase.replace(/\/$/, ""));
+      s.setAttribute("data-widget-id", widgetId);
+      s.async = true;
+      document.body.appendChild(s);
+    }
+
+    const params = getParams();
+    if (params.apiBase) byId("apiBase").value = params.apiBase;
+    if (params.widgetId) byId("widgetId").value = params.widgetId;
+
+    byId("loadBtn").addEventListener("click", function () {
+      const apiBase = normalizeApiBase(byId("apiBase").value);
+      const widgetId = byId("widgetId").value.trim();
+
+      if (!apiBase || !widgetId) {
+        setStatus("Please provide both API Base and Widget ID.", "err");
+        return;
+      }
+
+      byId("apiBase").value = apiBase;
+      injectWidget(apiBase, widgetId);
+      renderEmbedPreview(apiBase, widgetId);
+      setStatus("Widget injected. Use the chat launcher in the bottom-right corner.", "ok");
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("api_base", apiBase);
+      url.searchParams.set("widget_id", widgetId);
+      window.history.replaceState({}, "", url.toString());
+    });
+
+    renderEmbedPreview(byId("apiBase").value.trim(), byId("widgetId").value.trim() || "wid_xxxxxxxxxxxxxxxx");
+
+    if (byId("widgetId").value.trim()) {
+      byId("loadBtn").click();
+    }
+  </script>
+</body>
+</html>
