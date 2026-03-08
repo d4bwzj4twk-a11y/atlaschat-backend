@@ -401,6 +401,55 @@
       return byId("apiBase").value.trim().replace(/\/$/, "");
     }
 
+    function isLocalhostBase(url) {
+      return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(url || "").trim());
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function safeParseJson(res) {
+      const raw = await res.text();
+      if (!raw) return {};
+      try {
+        return JSON.parse(raw);
+      } catch (err) {
+        return { error: `Unexpected response (${res.status})` };
+      }
+    }
+
+    async function apiRequest(path, options = {}) {
+      const base = apiBase();
+      const timeoutMs = options.timeoutMs || 25000;
+      const retries = options.retries ?? 1;
+      let lastError;
+
+      for (let attempt = 0; attempt <= retries; attempt += 1) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          const res = await fetch(`${base}${path}`, {
+            ...options,
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          const data = await safeParseJson(res);
+          return { res, data };
+        } catch (err) {
+          clearTimeout(timeout);
+          lastError = err;
+          if (attempt < retries) {
+            await sleep(1200);
+            continue;
+          }
+        }
+      }
+
+      throw lastError || new Error("Request failed");
+    }
+
     function setStatus(text, isError) {
       const el = byId("status");
       el.textContent = text;
@@ -408,7 +457,14 @@
     }
 
     function loadSavedSettings() {
-      byId("apiBase").value = localStorage.getItem("atlaschat_api_base") || "http://localhost:4000";
+      const savedBase = localStorage.getItem("atlaschat_api_base");
+      if (savedBase) {
+        byId("apiBase").value = savedBase;
+      } else if (!["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+        byId("apiBase").value = window.location.origin;
+      } else {
+        byId("apiBase").value = "http://localhost:4000";
+      }
       byId("adminKey").value = localStorage.getItem("atlaschat_admin_key") || "";
     }
 
@@ -463,13 +519,19 @@
       const out = byId("businessList");
       out.innerHTML = '<div class="mini">Loading businesses...</div>';
 
+      const base = apiBase();
+      if (isLocalhostBase(base) && !["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+        out.innerHTML = '<div class="mini">Set API Base to your live backend domain (not localhost).</div>';
+        setStatus("API Base is set to localhost, which is unreachable from mobile/public devices.", true);
+        return;
+      }
+
       try {
-        const res = await fetch(`${apiBase()}/api/admin/businesses`, { headers: headers() });
-        const data = await res.json();
+        const { res, data } = await apiRequest("/api/admin/businesses", { headers: headers(), retries: 2 });
 
         if (!res.ok) {
           out.innerHTML = `<div class="mini">${data.error || "Failed to load businesses."}</div>`;
-          setStatus("Failed to fetch businesses.", true);
+          setStatus(`Failed to fetch businesses (${res.status}).`, true);
           return;
         }
 
@@ -564,7 +626,7 @@
         });
       } catch (err) {
         out.innerHTML = '<div class="mini">Network error while loading businesses.</div>';
-        setStatus("Network error while loading businesses.", true);
+        setStatus("Network error while loading businesses. Verify API Base uses HTTPS, and custom-domain SSL is active.", true);
       }
     }
 
@@ -597,10 +659,10 @@
       out.innerHTML = '<div class="mini">Loading knowledge base entries...</div>';
 
       try {
-        const res = await fetch(`${apiBase()}/api/admin/businesses/${businessId}/kb`, {
-          headers: headers()
+        const { res, data } = await apiRequest(`/api/admin/businesses/${businessId}/kb`, {
+          headers: headers(),
+          retries: 2
         });
-        const data = await res.json();
 
         if (!res.ok) {
           out.innerHTML = `<div class="mini">${data.error || "Failed to load KB entries."}</div>`;
@@ -693,13 +755,12 @@
       };
 
       try {
-        const res = await fetch(`${apiBase()}/api/admin/businesses`, {
+        const { res, data } = await apiRequest("/api/admin/businesses", {
           method: "POST",
           headers: headers(),
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          retries: 1
         });
-
-        const data = await res.json();
         byId("createBusinessOutput").textContent = JSON.stringify(data, null, 2);
 
         if (!res.ok) {
@@ -723,13 +784,12 @@
       };
 
       try {
-        const res = await fetch(`${apiBase()}/api/admin/businesses/${businessId}/kb`, {
+        const { res, data } = await apiRequest(`/api/admin/businesses/${businessId}/kb`, {
           method: "POST",
           headers: headers(),
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          retries: 1
         });
-
-        const data = await res.json();
         byId("createKbOutput").textContent = JSON.stringify(data, null, 2);
 
         if (!res.ok) {
